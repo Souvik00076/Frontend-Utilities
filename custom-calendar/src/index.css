@@ -54,6 +54,6 @@
 .days li.active::before {
         background: #9b59b6;
 }
-.days li:not(.active):hover::before {
+.days li .selected {
         background: #f2f2f2;
 }

@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LeftArrowIcon, RightArrowIcon } from '../assets'
 import { months } from '../constants'
 
@@ -13,7 +13,7 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
         const [currentMonth, setCurrentMonth] = useState<number>(
                 new Date().getMonth()
         )
-
+        const [selectedDay, setSelectedDay] = useState<number | null>(null)
         useEffect(() => {
                 const handleOutsideClickListener = (event: MouseEvent) => {
                         if (
@@ -32,6 +32,15 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                                 handleOutsideClickListener
                         )
         }, [])
+
+        const onClickItemHandler = (
+                event: React.MouseEvent<HTMLUListElement>
+        ) => {
+                console.log((event.target as HTMLUListElement).innerText)
+                setSelectedDay(
+                        Number((event.target as HTMLUListElement).innerText)
+                )
+        }
 
         const renderCalendar = useCallback(() => {
                 const firstDayofMonth = new Date(
@@ -71,7 +80,15 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                                 currentYear === currentDate.getFullYear()
                                         ? 'active'
                                         : ''
-                        days.push(<li className={isToday}>{i}</li>)
+                        const shouldSelect: boolean = selectedDay === i
+                        if (shouldSelect) console.log('hello')
+                        days.push(
+                                <li
+                                        className={`isToday ${shouldSelect ? 'selected' : ''} ${isToday}`}
+                                >
+                                        {i}
+                                </li>
+                        )
                 }
                 for (let i = lastDayofMonth; i < 6; i++) {
                         days.push(
@@ -81,8 +98,12 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                         )
                 }
                 return days
-        }, [currentYear, currentMonth])
+        }, [currentYear, currentMonth, selectedDay])
 
+        const getDays = useMemo(
+                () => renderCalendar(),
+                [selectedDay, currentMonth, currentYear]
+        )
         return (
                 <div
                         ref={calendarRef}
@@ -90,10 +111,10 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                         wrapper
                         absolute 
                         height-[400px] 
-                         top-[-200px]
-                         left-[120%]
-                         rounded-xl
-                                                  "
+                        top-[-200px]
+                        left-[120%]
+                        rounded-xl
+                        "
                 >
                         <div className="flex items-center justify-around">
                                 <img src={LeftArrowIcon} />
@@ -110,7 +131,12 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                                         <li>Fri</li>
                                         <li>Sat</li>
                                 </ul>
-                                <ul className="days">{renderCalendar()}</ul>
+                                <ul
+                                        onClick={onClickItemHandler}
+                                        className="days"
+                                >
+                                        {getDays}
+                                </ul>
                         </div>
                 </div>
         )
