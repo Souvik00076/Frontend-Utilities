@@ -54,6 +54,10 @@
 .days li.active::before {
         background: #9b59b6;
 }
-.days li .selected {
-        background: #f2f2f2;
+.days li.selected::before {
+        background: #f54958;
+}
+
+.days li.selected {
+        color: #fff;
 }

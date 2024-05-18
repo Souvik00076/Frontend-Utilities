@@ -36,7 +36,6 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
         const onClickItemHandler = (
                 event: React.MouseEvent<HTMLUListElement>
         ) => {
-                console.log((event.target as HTMLUListElement).innerText)
                 setSelectedDay(
                         Number((event.target as HTMLUListElement).innerText)
                 )
@@ -80,11 +79,24 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                                 currentYear === currentDate.getFullYear()
                                         ? 'active'
                                         : ''
-                        const shouldSelect: boolean = selectedDay === i
-                        if (shouldSelect) console.log('hello')
+                        const shouldSelect: boolean =
+                                selectedDay === null
+                                        ? false
+                                        : selectedDay === i &&
+                                          i > currentDate.getDate()
+
+                        const shouldGray: boolean =
+                                selectedDay === null
+                                        ? false
+                                        : i < selectedDay &&
+                                          i > currentDate.getDate()
                         days.push(
                                 <li
-                                        className={`isToday ${shouldSelect ? 'selected' : ''} ${isToday}`}
+                                        className={`isToday 
+                                        ${shouldSelect ? 'selected' : ''} 
+                                        ${isToday}
+                                        ${shouldGray ? 'bg-gray-200' : ''}
+                                        `}
                                 >
                                         {i}
                                 </li>
@@ -99,11 +111,20 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                 }
                 return days
         }, [currentYear, currentMonth, selectedDay])
-
-        const getDays = useMemo(
-                () => renderCalendar(),
-                [selectedDay, currentMonth, currentYear]
-        )
+        const prevButtonHandler = useCallback(() => {
+                if (currentMonth - 1 < 0) {
+                        setCurrentMonth(11)
+                        setCurrentYear(currentYear - 1)
+                } else setCurrentMonth(currentMonth - 1)
+                setSelectedDay(null)
+        }, [currentMonth])
+        const nextButtonHandler = useCallback(() => {
+                if (currentMonth + 1 > 11) {
+                        setCurrentMonth(0)
+                        setCurrentYear(currentYear + 1)
+                } else setCurrentMonth(currentMonth + 1)
+                setSelectedDay(null)
+        }, [currentMonth])
         return (
                 <div
                         ref={calendarRef}
@@ -116,10 +137,22 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                         rounded-xl
                         "
                 >
-                        <div className="flex items-center justify-around">
-                                <img src={LeftArrowIcon} />
-                                <span>{`${months[currentMonth]}, ${currentYear}`}</span>
-                                <img src={RightArrowIcon} />
+                        <div className="flex items-center justify-around mt-4">
+                                <img
+                                        src={LeftArrowIcon}
+                                        onClick={prevButtonHandler}
+                                        width={32}
+                                        height={32}
+                                />
+                                <span className="min-w-[200px] text-center">
+                                        {`${months[currentMonth]}, ${currentYear}`}{' '}
+                                </span>
+                                <img
+                                        src={RightArrowIcon}
+                                        onClick={nextButtonHandler}
+                                        width={32}
+                                        height={32}
+                                />
                         </div>
                         <div className="calendar">
                                 <ul className="weeks">
@@ -135,7 +168,7 @@ const Calendar: FC<CalendarProps> = ({ onClose }) => {
                                         onClick={onClickItemHandler}
                                         className="days"
                                 >
-                                        {getDays}
+                                        {renderCalendar()}
                                 </ul>
                         </div>
                 </div>
